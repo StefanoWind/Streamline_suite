@@ -1,0 +1,10 @@
+__pycache__
+*.cdf
+*.nc
+*.png
+*.csv
+*.log
+*.xlsx
+*.yaml
+*.txt
+*.hpl
