@@ -86,7 +86,7 @@ for f in files:
     plt.xlim([0,max_time])
     plt.xlabel('Time [s]')
     plt.ylabel(r'Azimuth [$^\circ$]')
-    plt.title(' '*120+'Real trajectory from '+os.path.basename(source)+', simulated trajectory based on '+os.path.basename(scan_file)+', PPR='+str(ppr))
+    plt.title(' '*120+'Real trajectory from '+os.path.basename(f)+', simulated trajectory based on '+os.path.basename(scan_file)+', PPR='+str(ppr))
         
     plt.subplot(1,2,2)
     plt.plot(time,ele,'.-k',label='Data')
