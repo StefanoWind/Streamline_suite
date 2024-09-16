@@ -25,7 +25,10 @@ scan_file=os.path.join(cd,'scans/240828.114620.CSM_test.txt')#scan file
 source_time=os.path.join(cd,'data/Halo_time_info.xlsx')#time information sheet
 identifier='no-overlapping'
 model='XR (Crosswind)'# lidar model
-ang_tol=0.25#[deg] angular tolerane
+ang_tol=0.25#[deg] angular tolerance
+
+#graphics
+max_time=410#[s] maixmum time for plot
 
 #%% Initialization
 with open(source_config, 'r') as fid:
@@ -38,11 +41,7 @@ import utils as utl
 #file names
 files=glob.glob(os.path.join(cd,'data',source))
 
-#graphics
-max_time=450#[s] maixmum time for plot
-
 #%% Main
-
 for f in files:
     #zeroing
     time=[]
@@ -83,7 +82,6 @@ for f in files:
     plt.plot(time,azi,'.-k',label='Data')
     plt.plot(time_sim,azi_sim,'o-r',fillstyle='none',markersize=3,label='Model')
     plt.grid()
-    plt.text(0,-40,'PPR = '+str(ppr))
     plt.xlim([0,max_time])
     plt.xlabel('Time [s]')
     plt.ylabel(r'Azimuth [$^\circ$]')
