@@ -16,7 +16,7 @@ import matplotlib
 plt.close('all')
 matplotlib.rcParams['font.family'] = 'serif'
 matplotlib.rcParams['mathtext.fontset'] = 'cm' 
-matplotlib.rcParams['font.size'] = 14
+matplotlib.rcParams['font.size'] = 16
 
 #%% Inputs
 source_config='config.yaml'
@@ -75,7 +75,7 @@ for f in files:
         
     #run scanning head simulator
     time_sim,azi_sim,ele_sim=HSS.Halo_scan_sim(scan_file,ppr,identifier,model,source_time)
-    
+
     # plots
     plt.figure(figsize=(18,8))
     plt.subplot(1,2,1)
@@ -84,8 +84,8 @@ for f in files:
     plt.grid()
     plt.xlim([0,max_time])
     plt.xlabel('Time [s]')
-    plt.ylabel(r'Azimuth [$^\circ$]')
-    plt.title(' '*120+'Real trajectory from '+os.path.basename(f)+', simulated trajectory based on '+os.path.basename(scan_file)+', PPR='+str(ppr))
+    plt.ylabel(r'$\theta$ [$^\circ$]')
+    plt.title(' '*120+'Real trajectory from '+os.path.basename(f)+', \n'+' '*120+' simulated trajectory based on '+os.path.basename(scan_file)+', PPR='+str(ppr))
         
     plt.subplot(1,2,2)
     plt.plot(time,ele,'.-k',label='Data')
@@ -93,9 +93,10 @@ for f in files:
     plt.grid()
     plt.xlim([0,max_time])
     plt.xlabel('Time [s]')
-    plt.ylabel(r'Elevation [$^\circ$]')
+    plt.ylabel(r'$\beta$ [$^\circ$]')
     plt.legend()
     plt.tight_layout()
+    
     
     
     
