@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Design scan to characterize sampling imte in CSM mode
+Design scan to characterize sampling time in CSM mode
 '''
 
 import os
@@ -19,7 +19,7 @@ matplotlib.rcParams['font.size'] = 14
 
 #%% Inputs
 source_config='config.yaml'
-narrow_scan_amplitude=40#[deg]
+narrow_scan_amplitude=40#[deg] amlpitude of narrow scans
 N_speeds=5#number of tested speeds
 
 max_S=5000#[10's of pulses per second] motor maximum speed
