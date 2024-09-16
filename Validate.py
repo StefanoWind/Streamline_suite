@@ -2,6 +2,7 @@
 '''
 Validate scanning head simulator
 '''
+
 import os
 cd=os.path.dirname(__file__)
 import sys
@@ -19,12 +20,12 @@ matplotlib.rcParams['font.size'] = 14
 
 #%% Inputs
 source_config='config.yaml'
-source=os.path.join(cd,'data','CSM_test','*.hpl')
-scan_file=os.path.join(cd,'scans/240828.114620.CSM_test.txt')
-source_time=os.path.join(cd,'data/Halo_time_info.xlsx')
+source=os.path.join(cd,'data','CSM_test','*.hpl')#source of scans
+scan_file=os.path.join(cd,'scans/240828.114620.CSM_test.txt')#scan file
+source_time=os.path.join(cd,'data/Halo_time_info.xlsx')#time information sheet
 identifier='no-overlapping'
-model='XR (Crosswind)'
-ang_tol=0.25
+model='XR (Crosswind)'# lidar model
+ang_tol=0.25#[deg] angular tolerane
 
 #%% Initialization
 with open(source_config, 'r') as fid:
@@ -37,9 +38,8 @@ import utils as utl
 #file names
 files=glob.glob(os.path.join(cd,'data',source))
 
-
 #graphics
-max_time=450#[s]
+max_time=450#[s] maixmum time for plot
 
 #%% Main
 
@@ -68,15 +68,16 @@ for f in files:
         ele=np.append(ele,np.float64(l_strip[2]))          
         ctr+=1
         line_number=18+ctr*(Nr+1)         
-        
+    
+    #fix coordinates
     time=time-time[0]
     azi=utl.round(azi,ang_tol)%360
     ele=utl.round(ele,ang_tol)%360
         
+    #run scanning head simulator
     time_sim,azi_sim,ele_sim=HSS.Halo_scan_sim(scan_file,ppr,identifier,model,source_time)
     
-    #%% Plots
-        
+    # plots
     plt.figure(figsize=(18,8))
     plt.subplot(1,2,1)
     plt.plot(time,azi,'.-k',label='Data')
