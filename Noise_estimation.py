@@ -164,6 +164,9 @@ for s in ACF_all.keys():
     plt.xlim([-30,-5])
     plt.xticks(np.arange(-30,-9,5),labels=[])
     plt.ylim([0.01,30])
+    
+    utl.mkdir(cd,'figures')
+    plt.savefig(os.path.join(cd,'figures',Data.attrs['datastream']+'.snr.noise.cutoff'+str(rws_max)+'.png'))
 
     
 
