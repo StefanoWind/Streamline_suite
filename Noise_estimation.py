@@ -6,7 +6,6 @@ Estimate noise from stare scan using the autocorrelatin method (Lenschow et el, 
 import os
 cd=os.path.dirname(__file__)
 import sys
-import utils as utl
 import numpy as np
 import xarray as xr
 import yaml
