@@ -28,6 +28,7 @@ source_config='config.yaml'
 source=os.path.join(cd,'data/awaken/sc1.lidar.z01.a0/*user*nc')
 rmin=96#[m] blind zone of the lidar
 rmax=3000#[m] max range 
+rws_max=40#[m/s] maximum rws discarded prior to the ACF estimation
 
 #noise estimation
 N_lags=100#number of lags of ACF
@@ -73,7 +74,8 @@ for f in files:
         sel_r=(r0>rmin)*(r0<rmax)
         r=r0[sel_r]
         tnum=np.array(Data['time'].values.tolist())/10**9
-    
+        Data['wind_speed']=Data['wind_speed'].where(np.abs(Data['wind_speed'])<rws_max).interpolate_na(dim='time')
+        
         rws=np.array(Data['wind_speed'])[:,sel_r].T
         snr=np.array(Data['SNR'])[:,sel_r].T
 
@@ -146,7 +148,7 @@ for s in ACF_all.keys():
     Output['SNR [dB]']=snr_avg
     Output['Noise StDev [m/s]']=noise_avg[s]
     
-    with pd.ExcelWriter(os.path.join(cd,'data',Data.attrs['datastream']+'.snr.noise.xlsx')) as writer:
+    with pd.ExcelWriter(os.path.join(cd,'data',Data.attrs['datastream']+'.snr.noise.cutoff'+str(rws_max)+'.xlsx')) as writer:
         Output.to_excel(writer, sheet_name=s, index=False)
     
     #Plots
