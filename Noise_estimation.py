@@ -28,6 +28,7 @@ source=os.path.join(cd,'data/awaken/sc1.lidar.z01.a0/*user*nc')
 rmin=96#[m] blind zone of the lidar
 rmax=3000#[m] max range 
 rws_max=40#[m/s] maximum rws discarded prior to the ACF estimation
+min_noise=10**-10 #[m/s] minimum noise level
 
 #noise estimation
 N_lags=100#number of lags of ACF
@@ -132,6 +133,7 @@ for s in ACF_all.keys():
     ACF_id[:,0]=(ACF_all[s][:,1]+(ACF_all[s][:,1]-ACF_all[s][:,2]))
     noise[s]=(ACF_all[s][:,0]-ACF_id[:,0])**0.5
     noise[s][ACF_all[s][:,1]<ACF_all[s][:,2]]=np.nan
+    noise[s][noise[s]<min_noise]=np.nan
     
     #statistics
     noise_avg[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_mean(x),                       bins=bins_snr)[0]
@@ -153,15 +155,15 @@ for s in ACF_all.keys():
     #Plots
     fig=plt.figure(figsize=(18,9))
     main_ax = fig.add_axes([0.1, 0.3, 0.6, 0.6]) 
-    plt.semilogy(snr_all[s],noise[s],'.k',alpha=0.1)
-    plt.errorbar(snr_avg,noise_avg[s],noise_avg[s]-noise_low[s],noise_top[s]-noise_avg[s],color='r')
+    plt.semilogy(snr_all[s],noise[s],'.k',alpha=0.05, markersize=5)
+    plt.errorbar(snr_avg,noise_avg[s],[noise_avg[s]-noise_low[s],noise_top[s]-noise_avg[s]],color='r')
     plt.plot(snr_avg,noise_avg[s],'.-r',markersize=10)
     plt.grid()
     plt.title('Noise estimation for '+s+' based on '+str(len(files))+' files')
-    
+    plt.xlabel(r'SNR [dB]')
     plt.ylabel('Measured noise StDev [m s$^{-1}$]')
     plt.xlim([-30,-5])
-    plt.xticks(np.arange(-30,-9,5),labels=[])
+    plt.xticks(np.arange(-30,-9,5))
     plt.ylim([0.01,30])
     
     utl.mkdir(os.path.join(cd,'figures'))
