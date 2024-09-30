@@ -24,7 +24,7 @@ matplotlib.rcParams['font.size'] = 16
 plt.close('all')
 
 #%% Inputs
-source_config='config.yaml'
+source_config=os.path.join(cd,'config.yaml')
 source=os.path.join(cd,'data/awaken/sc1.lidar.z01.a0/*user*nc')
 rmin=96#[m] blind zone of the lidar
 rmax=3000#[m] max range 
