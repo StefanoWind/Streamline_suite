@@ -50,7 +50,7 @@ sys.path.append(config['path_utils'])
 import utils as utl
 
 #files
-files=glob.glob(os.path.join(cd, source))
+files=sorted(glob.glob(os.path.join(cd, source)))
 
 #stats
 snr_avg=utl.mid(bins_snr)
@@ -155,9 +155,10 @@ for s in ACF_all.keys():
     #Plots
     fig=plt.figure(figsize=(18,9))
     main_ax = fig.add_axes([0.1, 0.3, 0.6, 0.6]) 
-    plt.semilogy(snr_all[s],noise[s],'.k',alpha=0.05, markersize=5)
+    plt.semilogy(snr_all[s],noise[s],'.k',alpha=0.05, markersize=10)
     plt.errorbar(snr_avg,noise_avg[s],[noise_avg[s]-noise_low[s],noise_top[s]-noise_avg[s]],color='r')
-    plt.plot(snr_avg,noise_avg[s],'.-r',markersize=10)
+    reals=~np.isnan(noise_avg[s])
+    plt.plot(snr_avg[reals],noise_avg[s][reals],'.-r',markersize=15)
     plt.grid()
     plt.title('Noise estimation for '+s+' based on '+str(len(files))+' files')
     plt.xlabel(r'SNR [dB]')
