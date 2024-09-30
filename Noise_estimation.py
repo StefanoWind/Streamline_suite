@@ -99,7 +99,7 @@ for f in files:
     rws_qc[rws_nsi>max_nsi,:]=np.nan
     rws_qc[snr_nsi>max_nsi,:]=np.nan
     
-    setup='ppr='+str(ppr)+' dr='+str(dr)
+    setup='ppr='+str(ppr)+'.dr='+str(dr)
     
     #noise estimation
     bin_tnum=np.arange(tnum[0],tnum[-1]+DT/2,DT)
@@ -148,7 +148,7 @@ for s in ACF_all.keys():
     Output['SNR [dB]']=snr_avg
     Output['Noise StDev [m/s]']=noise_avg[s]
     
-    with pd.ExcelWriter(os.path.join(cd,'data',Data.attrs['datastream']+'.snr.noise.cutoff'+str(rws_max)+'.xlsx')) as writer:
+    with pd.ExcelWriter(os.path.join(cd,'data',Data.attrs['datastream']+'.'+s+'.snr.noise.cutoff'+str(rws_max)+'.xlsx')) as writer:
         Output.to_excel(writer, sheet_name=s, index=False)
     
     #Plots
@@ -165,8 +165,8 @@ for s in ACF_all.keys():
     plt.xticks(np.arange(-30,-9,5),labels=[])
     plt.ylim([0.01,30])
     
-    utl.mkdir(cd,'figures')
-    plt.savefig(os.path.join(cd,'figures',Data.attrs['datastream']+'.snr.noise.cutoff'+str(rws_max)+'.png'))
+    utl.mkdir(os.path.join(cd,'figures'))
+    plt.savefig(os.path.join(cd,'figures',Data.attrs['datastream']+'.'+s+'.snr.noise.cutoff'+str(rws_max)+'.png'))
 
     
 
