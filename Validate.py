@@ -16,7 +16,7 @@ import matplotlib
 plt.close('all')
 matplotlib.rcParams['font.family'] = 'serif'
 matplotlib.rcParams['mathtext.fontset'] = 'cm' 
-matplotlib.rcParams['font.size'] = 16
+matplotlib.rcParams['font.size'] = 18
 
 #%% Inputs
 source_config='config.yaml'
