@@ -45,6 +45,7 @@ rmin=96#[m] blind zone of the lidar
 rmax=3000#[m] max range 
 rws_max=40#[m/s] maximum rws discarded prior to the ACF estimation
 min_noise=10**-10 #[m/s] minimum noise level
+min_Nt=100#minimum number of samples
 
 #%% Initialization
 
@@ -136,26 +137,26 @@ for f in files:
     for t1,t2 in zip(bin_tnum[:-1],bin_tnum[1:]):
         sel_t=(tnum>=t1)*(tnum<=t2)
         Nt=np.sum(sel_t)
-        ACF=np.zeros((len(r),N_lags))
-        rws_avg=np.tile(np.nanmean(rws_qc[:,sel_t],axis=1),(Nt,1)).T
-        rws_det=rws_qc[:,sel_t]-rws_avg
-       
-        for i_r in range(len(r)):
-            conv=np.correlate(rws_det[i_r,:],rws_det[i_r,:], mode='full')
-            N=np.correlate(np.zeros(Nt)+1, np.zeros(Nt)+1, mode='full')
-            ACF[i_r,:]=conv[Nt-1:Nt-1+N_lags]/N[Nt-1:Nt-1+N_lags]
+        if Nt>min_Nt:
+            ACF=np.zeros((len(r),N_lags))
+            rws_avg=np.tile(np.nanmean(rws_qc[:,sel_t],axis=1),(Nt,1)).T
+            rws_det=rws_qc[:,sel_t]-rws_avg
+            for i_r in range(len(r)):
+                conv=np.correlate(rws_det[i_r,:],rws_det[i_r,:], mode='full')
+                N=np.correlate(np.zeros(Nt)+1, np.zeros(Nt)+1, mode='full')
+                ACF[i_r,:]=conv[Nt-1:Nt-1+N_lags]/N[Nt-1:Nt-1+N_lags]
+                
+                #check on variance vs 0-lag ACF
+                if np.abs(ACF[i_r,0]-np.nanvar(rws_det[i_r,:]))>10**-10:
+                    raise ValueError('Variance mismatch')
             
-            #check on variance vs 0-lag ACF
-            if np.abs(ACF[i_r,0]-np.nanvar(rws_det[i_r,:]))>10**-10:
-                raise ValueError('Variance mismatch')
-        
-        #initialize structures for new lidar setup
-        if setup not in ACF_all:
-            ACF_all[setup]=[]
-            snr_all[setup]=[]
-
-        ACF_all[setup]=utl.vstack(ACF_all[setup],ACF)
-        snr_all[setup]=np.append(snr_all[setup],np.nanmean(snr[:,sel_t],axis=1))
+            #initialize structures for new lidar setup
+            if setup not in ACF_all:
+                ACF_all[setup]=[]
+                snr_all[setup]=[]
+    
+            ACF_all[setup]=utl.vstack(ACF_all[setup],ACF)
+            snr_all[setup]=np.append(snr_all[setup],np.nanmean(snr[:,sel_t],axis=1))
 
 #overall statistics
 for s in ACF_all.keys():
