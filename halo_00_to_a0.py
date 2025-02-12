@@ -3,9 +3,6 @@ Convert hpl Halo files to netCDF
 '''
 import os
 cd=os.path.dirname(__file__)
-import sys
-sys.path.append('C:/Users/SLETIZIA/OneDrive - NREL/Desktop/Main/utils')
-import utils as utl
 import xarray as xr
 import numpy as np
 import yaml
@@ -56,7 +53,7 @@ def rename(filename,site,instrument,z_id,level,save_path=None):
         
     if save_path==None:
         directory=os.path.join('/'.join(os.path.dirname(filename).split('/')[:-1]),site+'.'+instrument+'.'+z_id+'.'+level)
-        utl.mkdir(directory)
+        os.makedirs(directory,exist_ok=True)
     else:
         directory=os.path.join(save_path,site+'.'+instrument+'.'+z_id+'.'+level)
     filename_out=site+'.'+instrument+'.'+z_id+'.'+level+'.'+date_part+'.'+time_part+'.'+scan_type+os.path.splitext(filename)[1]
@@ -210,14 +207,9 @@ files=glob.glob(source, recursive=True)
 #config
 with open(source_config, 'r') as fid:
     config = yaml.safe_load(fid)
-    
-#imports
-sys.path.append(config['path_utils'])
-import utils as utl
 
 #%% Main
 for f in files:
-    # try:
     if rename_files:
         filename=rename(f,site,instrument,z_id,level,save_path)
     else:
@@ -225,7 +217,5 @@ for f in files:
     new_filename=os.path.join(os.path.dirname(filename.replace('.'+level,'.a0')),os.path.basename(filename).replace('.'+level+'.','.a0.').replace('hpl','nc'))
     if not os.path.exists(new_filename) or replace==True:
         dataset=read(filename)
-        utl.mkdir(os.path.dirname(filename.replace('.'+level,'.a0')))
+        os.makedirs(os.path.dirname(filename.replace('.'+level,'.a0')),exist_ok=True)
         dataset.to_netcdf(new_filename)
-    # except:
-    #     print(f+' failed')
