@@ -26,7 +26,7 @@ plt.close('all')
 source_config=os.path.join(cd,'config.yaml')
 
 if len(sys.argv)==1:
-    source=os.path.join(cd,'data/test/*stare*nc')
+    source='C:/Users/SLETIZIA/OneDrive - NREL/Desktop/Main/Technical/General/wdh-scripts/data/crosswind/nwtc.lidar.z01.a0/*nc'
     output_name='nwtc.lidar.z01'#name of output files
 else:
     source=sys.argv[1]
