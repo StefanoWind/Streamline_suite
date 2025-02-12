@@ -204,7 +204,7 @@ def read(filename):
     return dataset
 
 #%% Initalization
-files=glob.glob(source, recursive=True)
+files=sorted(glob.glob(source, recursive=True))
 
 #config
 with open(source_config, 'r') as fid:
@@ -213,12 +213,15 @@ with open(source_config, 'r') as fid:
 #%% Main
 for f in files:
     print(f'Processing {f}')
-    if rename_files:
-        filename=rename(f,site,instrument,z_id,level,save_path)
-    else:
-        filename=f
-    new_filename=os.path.join(os.path.dirname(filename.replace('.'+level,'.a0')),os.path.basename(filename).replace('.'+level+'.','.a0.').replace('hpl','nc'))
-    if not os.path.exists(new_filename) or replace==True:
-        dataset=read(filename)
-        os.makedirs(os.path.dirname(filename.replace('.'+level,'.a0')),exist_ok=True)
-        dataset.to_netcdf(new_filename)
+    try:
+        if rename_files:
+            filename=rename(f,site,instrument,z_id,level,save_path)
+        else:
+            filename=f
+        new_filename=os.path.join(os.path.dirname(filename.replace('.'+level,'.a0')),os.path.basename(filename).replace('.'+level+'.','.a0.').replace('hpl','nc'))
+        if not os.path.exists(new_filename) or replace==True:
+            dataset=read(filename)
+            os.makedirs(os.path.dirname(filename.replace('.'+level,'.a0')),exist_ok=True)
+            dataset.to_netcdf(new_filename)
+    except:
+        print(f'Fatal error at {f}')
