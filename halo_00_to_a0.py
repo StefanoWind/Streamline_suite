@@ -9,6 +9,8 @@ import yaml
 import glob
 import shutil
 import re
+import warnings
+warnings.filterwarnings("ignore")
 
 #%% Inputs
 source_config=os.path.join(cd,'config.yaml')
@@ -210,6 +212,7 @@ with open(source_config, 'r') as fid:
 
 #%% Main
 for f in files:
+    print(f'Processing {f}')
     if rename_files:
         filename=rename(f,site,instrument,z_id,level,save_path)
     else:
