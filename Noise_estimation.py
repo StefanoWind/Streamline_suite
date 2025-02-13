@@ -26,7 +26,7 @@ plt.close('all')
 source_config=os.path.join(cd,'config.yaml')
 
 if len(sys.argv)==1:
-    source='C:/Users/SLETIZIA/OneDrive - NREL/Desktop/Main/Technical/General/wdh-scripts/data/crosswind/nwtc.lidar.z01.a0/*nc'
+    source=os.path.join(cd,'data/test/*202411*nc')
     output_name='nwtc.lidar.z01'#name of output files
 else:
     source=sys.argv[1]
@@ -38,7 +38,7 @@ max_nsi=0.5#maximum ratio of standard deviation standard deviation to mean stand
 DT=600#[m] averaging time
 min_time_bins=5#number of time bins to check non-stationarity
 p_value=0.05#p_value for bootstrap
-bins_snr=np.arange(-30.5,10.6)#[dB] bins in snr
+bins_snr=np.arange(-40.5,10.6)#[dB] bins in snr
 
 #qc
 rmin=96#[m] blind zone of the lidar
@@ -46,6 +46,9 @@ rmax=3000#[m] max range
 rws_max=40#[m/s] maximum rws discarded prior to the ACF estimation
 min_noise=10**-10 #[m/s] minimum noise level
 min_Nt=100#minimum number of samples
+prec_rws_thresh=-1#[m/s] rws threshold to flag precipitation (smaller than)
+prec_snr_thresh=-10#[dB] snr threshold to flag precipitation (higher than)
+prec_r_thresh=1000#[m] range threshold to flag precipitation (higher than)
 
 #%% Initialization
 
@@ -77,7 +80,7 @@ os.makedirs(os.path.join(cd,'figures',output_name),exist_ok=True)
 
 #%% Main
 for f in files:
-    print('Processing '+f)
+    print(f'Processing {os.path.basename(f)}', flush=True)
     with xr.open_dataset(f) as Data:
         
         #sort time
@@ -111,7 +114,14 @@ for f in files:
 
         ppr=int(Data.attrs[config['ppr_name']])
         dr=int(Data.attrs[config['dr_name']])
-        
+    
+    #precipitation check
+    prec=np.sum((np.nanmean(rws[r>prec_r_thresh,:],axis=1)<prec_rws_thresh)*(np.nanmean(snr[r>prec_r_thresh,:],axis=1)>prec_snr_thresh))
+    
+    if prec>0:
+        print(f'Possible precipitation detected, skipping {os.path.basename(f)}', flush=True)
+        continue
+    
     #stationarity check (based on stddev of binned stdev)
     bin_tnum_nsi=np.arange(tnum[0],tnum[-1]+DT/2,DT)
     if len(bin_tnum_nsi)<min_time_bins+1:
@@ -172,12 +182,15 @@ for s in ACF_all.keys():
     noise_low[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_BS_mean(x,p_value/2*100),      bins=bins_snr)[0]
     noise_top[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_BS_mean(x,(1-p_value/2)*100),  bins=bins_snr)[0]
 
+    snr_hist=np.histogram(snr_all[s][noise[s]>0],bins=bins_snr)[0]
+    
     #Output
     Output=pd.DataFrame()
     Output['SNR [dB]']=snr_avg
     Output['Noise StDev [m/s]']=noise_avg[s]
     Output[f'Noise StDev ({p_value/2*100}% percentile) [m/s]']=noise_low[s]
     Output[f'Noise StDev ({(1-p_value/2)*100}% percentile) [m/s]']=noise_top[s]
+    Output['Occurrence']=snr_hist
     
     with pd.ExcelWriter(os.path.join(cd,'data',output_name,output_name+s+'.snr.noise.cutoff'+str(rws_max)+'.xlsx')) as writer:
         Output.to_excel(writer, sheet_name=s, index=False)
