@@ -26,7 +26,7 @@ plt.close('all')
 source_config=os.path.join(cd,'config.yaml')
 
 if len(sys.argv)==1:
-    source=os.path.join(cd,'data/test/*202411*nc')
+    source=os.path.join(cd,'data/test/*20241119*nc')
     output_name='nwtc.lidar.z01'#name of output files
 else:
     source=sys.argv[1]
@@ -34,13 +34,14 @@ else:
 
 #noise estimation
 N_lags=100#number of lags of ACF
-max_nsi=0.5#maximum ratio of standard deviation standard deviation to mean standard deviation
 DT=600#[m] averaging time
+DT_nsi=300#[min] nsi averaging time
 min_time_bins=5#number of time bins to check non-stationarity
 p_value=0.05#p_value for bootstrap
 bins_snr=np.arange(-40.5,10.6)#[dB] bins in snr
 
 #qc
+max_nsi=0.25#maximum ratio of standard deviation standard deviation to mean standard deviation
 rmin=96#[m] blind zone of the lidar
 rmax=3000#[m] max range 
 rws_max=40#[m/s] maximum rws discarded prior to the ACF estimation
@@ -67,6 +68,8 @@ files=sorted(glob.glob(os.path.join(cd, source)))
 snr_avg=utl.mid(bins_snr)
 
 #zeroing
+t1_all={}
+t2_all={}
 ACF_all={}
 snr_all={}
 noise={}
@@ -123,7 +126,7 @@ for f in files:
         continue
     
     #stationarity check (based on stddev of binned stdev)
-    bin_tnum_nsi=np.arange(tnum[0],tnum[-1]+DT/2,DT)
+    bin_tnum_nsi=np.arange(tnum[0],tnum[-1]+DT_nsi/2,DT_nsi)
     if len(bin_tnum_nsi)<min_time_bins+1:
         bin_tnum_nsi=np.linspace(tnum[0],tnum[-1],min_time_bins+1)
     rws_std=[]
@@ -164,7 +167,10 @@ for f in files:
             if setup not in ACF_all:
                 ACF_all[setup]=[]
                 snr_all[setup]=[]
-    
+                t1_all[setup]=[]
+                t2_all[setup]=[]
+            t1_all[setup]=np.append(t1_all,t1)
+            t2_all[setup]=np.append(t2_all,t2)
             ACF_all[setup]=utl.vstack(ACF_all[setup],ACF)
             snr_all[setup]=np.append(snr_all[setup],np.nanmean(snr[:,sel_t],axis=1))
 
@@ -212,7 +218,7 @@ for s in ACF_all.keys():
     
     utl.mkdir(os.path.join(cd,'figures'))
     plt.savefig(os.path.join(cd,'figures',output_name,output_name+s+'.snr.noise.cutoff'+str(rws_max)+'.png'))
-    plt.close()
+    # plt.close()
 
     
 
