@@ -26,7 +26,7 @@ plt.close('all')
 source_config=os.path.join(cd,'config.yaml')
 
 if len(sys.argv)==1:
-    source=os.path.join(cd,'data/test/*20241119*nc')
+    source=os.path.join(cd,'data/test/*20241119.10*nc')
     output_name='nwtc.lidar.z01'#name of output files
 else:
     source=sys.argv[1]
@@ -119,7 +119,7 @@ for f in files:
         dr=int(Data.attrs[config['dr_name']])
     
     #precipitation check
-    prec=np.sum((np.nanmean(rws[r>prec_r_thresh,:],axis=1)<prec_rws_thresh)*(np.nanmean(snr[r>prec_r_thresh,:],axis=1)>prec_snr_thresh))
+    prec=np.sum((np.nanmedian(rws[r>prec_r_thresh,:],axis=1)<prec_rws_thresh)*(np.nanmedian(snr[r>prec_r_thresh,:],axis=1)>prec_snr_thresh))
     
     if prec>0:
         print(f'Possible precipitation detected, skipping {os.path.basename(f)}', flush=True)
@@ -136,12 +136,16 @@ for f in files:
         rws_std=utl.vstack(rws_std,np.nanstd(rws[:,sel_t],axis=1))
         snr_std=utl.vstack(snr_std,np.nanstd(snr[:,sel_t],axis=1))
         
-    rws_nsi=np.nanstd(rws_std,axis=0)/np.nanmean(rws_std,axis=0)#non-stationarity index for rws
-    snr_nsi=np.nanstd(snr_std,axis=0)/np.nanmean(snr_std,axis=0)#non-stationarity index for snr
+    rws_nsi=np.nanstd(rws_std,axis=0)/np.nanmedian(rws_std,axis=0)#non-stationarity index for rws
+    snr_nsi=np.nanstd(snr_std,axis=0)/np.nanmedian(snr_std,axis=0)#non-stationarity index for snr
     
     rws_qc=rws.copy()
     rws_qc[rws_nsi>max_nsi,:]=np.nan
     rws_qc[snr_nsi>max_nsi,:]=np.nan
+    
+    snr_qc=snr.copy()
+    snr_qc[rws_nsi>max_nsi,:]=np.nan
+    snr_qc[snr_nsi>max_nsi,:]=np.nan
     
     setup='ppr='+str(ppr)+'.dr='+str(dr)
     
@@ -172,7 +176,7 @@ for f in files:
             t1_all[setup]=np.append(t1_all,t1)
             t2_all[setup]=np.append(t2_all,t2)
             ACF_all[setup]=utl.vstack(ACF_all[setup],ACF)
-            snr_all[setup]=np.append(snr_all[setup],np.nanmean(snr[:,sel_t],axis=1))
+            snr_all[setup]=np.append(snr_all[setup],np.nanmedian(snr_qc[:,sel_t],axis=1))
 
 #overall statistics
 for s in ACF_all.keys():
@@ -184,9 +188,9 @@ for s in ACF_all.keys():
     noise[s][noise[s]<min_noise]=np.nan
     
     #statistics
-    noise_avg[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_mean(x),                       bins=bins_snr)[0]
-    noise_low[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_BS_mean(x,p_value/2*100),      bins=bins_snr)[0]
-    noise_top[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_BS_mean(x,(1-p_value/2)*100),  bins=bins_snr)[0]
+    noise_avg[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_stat(x,np.nanmedian),                       bins=bins_snr)[0]
+    noise_low[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_BS_stat(x,np.nanmedian,p_value/2*100),      bins=bins_snr)[0]
+    noise_top[s]=10**stats.binned_statistic(snr_all[s],np.log10(noise[s]),statistic=lambda x:utl.filt_BS_stat(x,np.nanmedian,(1-p_value/2)*100),  bins=bins_snr)[0]
 
     snr_hist=np.histogram(snr_all[s][noise[s]>0],bins=bins_snr)[0]
     
