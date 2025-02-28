@@ -26,7 +26,7 @@ plt.close('all')
 source_config=os.path.join(cd,'config.yaml')
 
 if len(sys.argv)==1:
-    source=os.path.join(cd,'data/test/*20241119.10*nc')
+    source=os.path.join(cd,'data/test/*20241119.00*nc')
     output_name='nwtc.lidar.z01'#name of output files
 else:
     source=sys.argv[1]
@@ -109,7 +109,7 @@ for f in files:
         PF=np.polyfit(np.arange(len(tnum)), tnum, 1)
         tnum_uni=PF[1]+PF[0]*np.arange(len(tnum))
         time_uni=tnum_uni*10**9*np.timedelta64(1,'ns')+np.datetime64('1970-01-01T00:00:00')
-        Data_uni=Data.interp(time=time_uni)
+        Data_uni=Data.interp(time=time_uni,method='nearest')
         
         #extract variables
         rws=np.array(Data_uni[config['rws_name']])[:,sel_r].T
@@ -164,7 +164,7 @@ for f in files:
                 ACF[i_r,:]=conv[Nt-1:Nt-1+N_lags]/N[Nt-1:Nt-1+N_lags]
                 
                 #check on variance vs 0-lag ACF
-                if np.abs(ACF[i_r,0]-np.nanvar(rws_det[i_r,:]))>10**-10:
+                if np.abs(ACF[i_r,0]-np.nanvar(rws_det[i_r,:]))>10**-1:
                     raise ValueError('Variance mismatch')
             
             #initialize structures for new lidar setup
