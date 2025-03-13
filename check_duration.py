@@ -20,10 +20,10 @@ root='C:/Lidar/Data/Proc'
 
 date='20230726'
 
-time_res=10#[min=]
+time_res=10#[min]
+
 #%% Initialization
 source=os.path.join(date[:4],date[:6],date)
-
 
 files=glob.glob(os.path.join(root,source,'*.hpl'))
 

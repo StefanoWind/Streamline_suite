@@ -26,7 +26,7 @@ plt.close('all')
 source_config=os.path.join(cd,'config.yaml')
 
 if len(sys.argv)==1:
-    source=os.path.join(cd,'data/test/*20241119.00*nc')
+    source=os.path.join(cd,'data/test/*20241119.02*nc')
     output_name='nwtc.lidar.z01'#name of output files
 else:
     source=sys.argv[1]

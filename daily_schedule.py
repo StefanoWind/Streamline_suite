@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 
 #%% Inputs
-source='scans/250124_awaken_profiling/'
-source_scan='seq_awaken_profiling_sa1.xlsx'
+source='scans/250312_g3p3_one_lidar'
+source_scan='seq_g3p3_one_lidar.xlsx'
 time_corr=-2
 avg_loops=1
 scan_mode='S'
@@ -38,12 +38,12 @@ dir_save='scans/'+dt.datetime.strftime(now,'%y%m%d_%H%M')+'_'+os.path.basename(s
 os.makedirs(dir_save,exist_ok=True)
 
 for f,n in zip(filenames,N):
-    with open(source+f,'r') as fid:
+    with open(os.path.join(source,f),'r') as fid:
         lines=fid.read()
     
     s=lines*n
     
-    with open(dir_save+'/'+os.path.basename(f[:-4])+'x'+str(n)+'.txt','w') as fid:
+    with open(os.path.join(dir_save,os.path.basename(f[:-4])+'x'+str(n)+'.txt'),'w') as fid:
         fid.write(s[:-1])
         
 

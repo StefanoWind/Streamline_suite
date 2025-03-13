@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-#03/28/2023: created
-#03/31/2032: adapted to new Halo simulator, finalized
-#04/04/2023: added volumetric option
-#07/05/2023 (v 2): fixed bug when azi and ele have different lengths
-
+'''
+Write Halo scan text file from xlsx table
+'''
 import os
 cd=os.path.dirname(__file__)
 from datetime import datetime
@@ -20,14 +18,29 @@ matplotlib.rcParams['mathtext.fontset'] = 'cm'
 matplotlib.rcParams['font.size'] = 14
 
 #%% Inputs
-source='scans/250124_awaken_profiling/mod_inc_six-beam.xlsx'
+source='scans/250312_g3p3_one_lidar/360ppi_1deg.xlsx'
 source_time='data/Halo_time_info.xlsx'
 volumetric=False
 scan_mode='SSM'
 identifier='no-overlapping'
 model='XR+'
-ppr=10000
+ppr=3000
 repeat=1
+
+#%% Functions
+def lidar_xyz(r,ele,azi):
+    Nr=len(r)
+    Nb=len(ele)
+    
+    R=np.transpose(np.tile(r,(Nb,1)))
+    A=np.tile(azi,(Nr,1))
+    E=np.tile(ele,(Nr,1))
+    
+    X=R*np.cos(np.radians(E))*np.cos(90-np.radians(A))
+    Y=R*np.cos(np.radians(E))*np.sin(90-np.radians(A))
+    Z=R*np.sin(np.radians(E))
+    
+    return X,Y,Z
 
 #%% Initialization
 scan_info=pd.read_excel(source)
@@ -91,10 +104,9 @@ if scan_mode=='CSM':
     A2=50+np.zeros(len(P2))
     a2=A2*1000/ppd2
 
-x,y,z=utl.lidar_xyz(r, ele, azi)
+x,y,z=lidar_xyz(r, ele, azi)
 
 #write scan file
-
 if scan_mode=='CSM':
     for p1,p2,s1,s2,a1,a2 in zip(P1[:-1],P2[:-1],S1[:-1],S2[:-1],A1[:-1],A2[:-1]):
         
@@ -115,13 +127,13 @@ Output=pd.DataFrame()
 
 
 #simulate scanning head
-time_sim,azi_sim,ele_sim=HS.Halo_scan_sim(name+'.txt',ppr,identifier,model,source_time,dt=0.01,ang_tol=0.25,azi0=0,ele0=0, ppd1=500000/360,ppd2=250000/360)
+# time_sim,azi_sim,ele_sim=HS.Halo_scan_sim(name+'.txt',ppr,identifier,model,source_time,dt=0.01,ang_tol=0.25,azi0=0,ele0=0, ppd1=500000/360,ppd2=250000/360)
 
-Output['Time']=time
-Output['Azimuth']=azi2
-Output['Elevation']=ele2
-Output.set_index('Time')
-Output.to_excel(name+'.xlsx')
+# Output['Time']=time
+# Output['Azimuth']=azi2
+# Output['Elevation']=ele2
+# Output.set_index('Time')
+# Output.to_excel(name+'.xlsx')
 
 #%% Plots
 
