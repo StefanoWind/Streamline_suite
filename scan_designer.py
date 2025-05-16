@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 '''
-Write Halo scan text file from xlsx table
+Write scan text file from xlsx table
 '''
 import os
 cd=os.path.dirname(__file__)
 from datetime import datetime
-import utils as utl
 import Halo_scan_sim as HS
 import numpy as np
 import pandas as pd
@@ -18,13 +17,13 @@ matplotlib.rcParams['mathtext.fontset'] = 'cm'
 matplotlib.rcParams['font.size'] = 14
 
 #%% Inputs
-source='scans/250312_g3p3_one_lidar/360ppi_1deg.xlsx'
+source='scans/250513_Galion_test/H06.w0.5.o20.xlsx'
 source_time='data/Halo_time_info.xlsx'
 volumetric=False
 scan_mode='SSM'
 identifier='no-overlapping'
-model='XR+'
-ppr=3000
+model='Halo XR+'
+ppr=10000
 repeat=1
 
 #%% Functions
@@ -113,7 +112,7 @@ if scan_mode=='CSM':
         l='A.1=%.0f'%a1+',S.1=%.0f'%s1+',P.1=%.0f'%p1+'*A.2=%.0f'%a2+',S.2=%.0f'%s2+',P.2=%.0f'%p2+'\nW=0\n'
         L+=l
 elif scan_mode=='SSM':
-    if utl.len2(azi)>1:
+    if isinstance(azi, np.ndarray):
         for a,e in zip(azi[:-1],ele[:-1]):
             L=L+('%07.3f' % a+ '%07.3f' % e +'\n')
     else:
@@ -127,27 +126,29 @@ Output=pd.DataFrame()
 
 
 #simulate scanning head
-# time_sim,azi_sim,ele_sim=HS.Halo_scan_sim(name+'.txt',ppr,identifier,model,source_time,dt=0.01,ang_tol=0.25,azi0=0,ele0=0, ppd1=500000/360,ppd2=250000/360)
+time_sim,azi_sim,ele_sim=HS.Halo_scan_sim(name+'.txt',ppr,identifier,model,source_time,dt=0.01,ang_tol=0.25,azi0=0,ele0=0, ppd1=500000/360,ppd2=250000/360)
 
-# Output['Time']=time
-# Output['Azimuth']=azi2
-# Output['Elevation']=ele2
-# Output.set_index('Time')
-# Output.to_excel(name+'.xlsx')
+if time is not None:
+    Output['Time']=time
+    Output['Azimuth']=azi2
+    Output['Elevation']=ele2
+    Output.set_index('Time')
+    Output.to_excel(name+'.xlsx')
 
 #%% Plots
 
-plt.figure(figsize=(18,8))
-plt.subplot(2,1,1)
-plt.plot(time,azi2,'.-k')
-plt.xlabel('Time [s]')
-plt.ylabel(r'$\theta$ [$^\circ]$')
-plt.grid()
-plt.subplot(2,1,2)
-plt.plot(time,ele2,'.-k')
-plt.xlabel('Time [s]')
-plt.ylabel(r'$\beta$ [$^\circ]$')
-plt.grid()
+if time is not None:
+    plt.figure(figsize=(18,8))
+    plt.subplot(2,1,1)
+    plt.plot(time,azi2,'.-k')
+    plt.xlabel('Time [s]')
+    plt.ylabel(r'$\theta$ [$^\circ]$')
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.plot(time,ele2,'.-k')
+    plt.xlabel('Time [s]')
+    plt.ylabel(r'$\beta$ [$^\circ]$')
+    plt.grid()
 
 fig=plt.figure()
 ax = plt.subplot(1,1,1,projection='3d')
@@ -155,5 +156,8 @@ ax.scatter(x,y,z,s=5,c='k', alpha=0.25)
 ax.set_xlabel(r'$x$ [m]')
 ax.set_ylabel(r'$y$ [m]')
 ax.set_zlabel(r'$z$ [m]')
-utl.axis_equal()
+xlim=ax.get_xlim()
+ylim=ax.get_ylim()
+zlim=ax.get_zlim()
+ax.set_box_aspect((np.diff(xlim)[0],np.diff(ylim)[0],np.diff(zlim)[0]))
 plt.grid()

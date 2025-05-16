@@ -82,7 +82,8 @@ def Halo_scan_sim(scan_file,ppr,identifier,model,source_time,dt=0.01,ang_tol=0.2
         azi_all=azi_range[0]
         ele_all=ele_range[0]
     elif scan_mode=='SSM':
-        raise ValueError("SSM mode not supported")
+        print("SSM mode not supported")
+        return None,None.None
         
 
     #scanning head movement        

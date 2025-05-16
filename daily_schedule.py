@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 
 #%% Inputs
-source='scans/250312_g3p3_one_lidar'
-source_scan='seq_g3p3_one_lidar.xlsx'
+source='scans/250509_awaken_multiPPT'
+source_scan='seq_awaken_multiPPT.xlsx'
 time_corr=-2
 avg_loops=1
 scan_mode='S'
